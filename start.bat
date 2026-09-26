@@ -4,7 +4,7 @@ title Dimsum Mentai Oishi - WhatsApp Bot Launcher
 
 echo.
 echo ==============================================================
-echo    🍱  DIMSUM MENTAI OISHI - WHATSAPP BOT LAUNCHER  🍱
+echo    DIMSUM MENTAI OISHI - WHATSAPP BOT LAUNCHER
 echo ==============================================================
 echo.
 
@@ -36,12 +36,12 @@ echo.
 echo ==============================================================
 echo    Sistem Berhasil Dijalankan!
 echo.
-echo    📱 Dashboard Admin & Scan QR:  http://127.0.0.1:5000/admin
-echo    💬 Chatbot Simulator:          http://127.0.0.1:5000/chat
-echo    🌐 QR Web Viewer:              http://127.0.0.1:3000/qr
+echo    Dashboard Admin & Scan QR:  http://127.0.0.1:5000/admin
+echo    Chatbot Simulator:          http://127.0.0.1:5000/chat
+echo    QR Web Viewer:              http://127.0.0.1:3000/qr
 echo ==============================================================
 echo.
-echo    >> Scan QR Code di window WhatsApp Bot yang baru terbuka
-echo       atau buka link Admin / QR di browser kamu!
+echo    Scan QR Code di window WhatsApp Bot yang baru terbuka
+echo    atau buka link Admin / QR di browser kamu!
 echo.
 pause
