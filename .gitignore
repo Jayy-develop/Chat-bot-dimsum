@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv
+env/
+venv/
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+wpp-server/node_modules/
+
+# Ignore database to keep it fresh for others, or keep it if we want to share the mock data
+# dimsum.db 
+# (Untuk presentasi, mending db nya ikut di-push aja biar udah ada data produknya)
+
+# Mac/Windows
+.DS_Store
+Thumbs.db

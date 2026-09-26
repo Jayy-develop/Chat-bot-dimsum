@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Chat - Dimsum Mentai Oishi</title>
+  <meta name="description" content="WhatsApp Chatbot Simulator Dimsum Mentai Oishi">
+  
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Styling khusus Chat WhatsApp */
+    body {
+      background-color: #d1d7db;
+    }
+    .wa-nav-bar {
+      background: white;
+      border-bottom: 1px solid #e4e4e7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav Bar -->
+  <div class="wa-nav-bar py-2 px-3 d-flex justify-content-between align-items-center">
+    <a href="/" class="text-decoration-none d-flex align-items-center gap-2 text-dark">
+      <span style="font-size: 1.5rem;">🍱</span>
+      <span class="fw-bold">Dimsum Mentai Oishi</span>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-success d-none d-sm-inline"><i class="bi bi-whatsapp"></i> WPPConnect Ready</span>
+      <a href="/admin" class="btn btn-outline-dark btn-sm rounded-pill">
+        <i class="bi bi-speedometer2"></i> Dashboard Admin
+      </a>
+      <a href="/" class="btn btn-outline-secondary btn-sm rounded-pill">
+        <i class="bi bi-house"></i> Home
+      </a>
+    </div>
+  </div>
+
+  <div class="container-fluid p-0 p-md-3">
+    <!-- WhatsApp Chat Container -->
+    <div class="wa-wrapper">
+      
+      <!-- WA Header -->
+      <div class="wa-header">
+        <div class="wa-profile">
+          <div class="wa-avatar">🍱</div>
+          <div class="wa-info">
+            <h6>
+              Dimsum Mentai Oishi
+              <i class="bi bi-patch-check-fill wa-verified" title="Official Verified Business"></i>
+            </h6>
+            <div class="wa-status">
+              <span class="wa-status-dot"></span>
+              <span>Online • Asisten Pemesanan Otomatis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wa-header-actions">
+          <button id="btnResetChat" class="btn-sm" title="Reset Percakapan">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <a href="/admin" title="Buka Admin">
+            <i class="bi bi-gear-fill"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- WA Chat Body (Message Flow) -->
+      <div class="wa-body" id="chatBody">
+        <div class="chat-date-divider">HARI INI</div>
+
+        <!-- Initial Greeting Message from Bot -->
+        <div class="chat-row in">
+          <div class="chat-bubble in">Halo Kak 👋
+Selamat datang di <b>Dimsum Mentai Oishi</b> 🍱
+
+Menu:
+1. Lihat Produk
+2. Pesan
+3. Cek Pesanan</div>
+          <div class="chat-meta">
+            <span id="initTime">12:00</span>
+          </div>
+        </div>
+
+        <!-- Quick Replies Chips -->
+        <div class="quick-replies-container" id="quickRepliesBox">
+          <button class="quick-reply-btn" onclick="sendQuickReply('1. Lihat Produk')">
+            <i class="bi bi-card-list"></i> 1. Lihat Produk
+          </button>
+          <button class="quick-reply-btn" onclick="sendQuickReply('2. Pesan')">
+            <i class="bi bi-bag-plus"></i> 2. Pesan
+          </button>
+          <button class="quick-reply-btn" onclick="sendQuickReply('3. Cek Pesanan')">
+            <i class="bi bi-search"></i> 3. Cek Pesanan
+          </button>
+        </div>
+
+        <!-- Typing Indicator (Hidden by default) -->
+        <div class="typing-indicator d-none" id="typingIndicator">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+
+      <!-- WA Footer (Input Box) -->
+      <div class="wa-footer">
+        <!-- Phone number input for demo simulation testing -->
+        <div class="d-none d-sm-flex align-items-center gap-1 bg-white px-2 py-1 rounded-pill border">
+          <i class="bi bi-telephone text-muted" style="font-size: 0.8rem;"></i>
+          <input type="text" id="userPhone" value="628123456789" class="border-0 bg-transparent" style="font-size: 0.8rem; width: 105px; outline: none;" title="Nomor WhatsApp Simulasi">
+        </div>
+
+        <input 
+          type="text" 
+          id="chatInput" 
+          class="wa-input-box" 
+          placeholder="Ketik pesan WhatsApp..." 
+          autocomplete="off"
+        >
+
+        <button class="wa-send-btn" id="btnSend">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript for WhatsApp Chat -->
+  <script>
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const btnSend = document.getElementById('btnSend');
+    const btnResetChat = document.getElementById('btnResetChat');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const quickRepliesBox = document.getElementById('quickRepliesBox');
+    const userPhoneInput = document.getElementById('userPhone');
+
+    // Current time helper
+    function getCurrentTime() {
+      const now = new Date();
+      return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    }
+
+    document.getElementById('initTime').innerText = getCurrentTime();
+
+    // Scroll to bottom helper
+    function scrollToBottom() {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Render outgoing bubble (Customer)
+    function appendUserMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'chat-row out';
+      row.innerHTML = `
+        <div class="chat-bubble out">${escapeHtml(text)}</div>
+        <div class="chat-meta">
+          <span>${getCurrentTime()}</span>
+          <span class="chat-ticks">✓✓</span>
+        </div>
+      `;
+      chatBody.insertBefore(row, typingIndicator);
+      scrollToBottom();
+    }
+
+    // Render incoming bubble (Bot)
+    function appendBotMessage(text, quickReplies = []) {
+      const row = document.createElement('div');
+      row.className = 'chat-row in';
+      
+      // Format markdown-like bold *text* to <b>text</b>
+      let formattedText = escapeHtml(text);
+      formattedText = formattedText.replace(/\*(.*?)\*/g, '<b>$1</b>');
+      formattedText = formattedText.replace(/_(.*?)_/g, '<i>$1</i>');
+
+      row.innerHTML = `
+        <div class="chat-bubble in">${formattedText}</div>
+        <div class="chat-meta">
+          <span>${getCurrentTime()}</span>
+        </div>
+      `;
+      chatBody.insertBefore(row, typingIndicator);
+
+      // Render quick reply buttons if any
+      quickRepliesBox.innerHTML = '';
+      if (quickReplies && quickReplies.length > 0) {
+        quickReplies.forEach(qr => {
+          const btn = document.createElement('button');
+          btn.className = 'quick-reply-btn';
+          btn.innerText = qr;
+          btn.onclick = () => sendQuickReply(qr);
+          quickRepliesBox.appendChild(btn);
+        });
+        chatBody.appendChild(quickRepliesBox);
+      }
+
+      scrollToBottom();
+    }
+
+    function escapeHtml(string) {
+      const p = document.createElement('p');
+      p.appendChild(document.createTextNode(string));
+      return p.innerHTML;
+    }
+
+    // Send Message Logic
+    async function sendMessage(textToSend) {
+      const message = textToSend || chatInput.value.trim();
+      if (!message) return;
+
+      appendUserMessage(message);
+      chatInput.value = '';
+      quickRepliesBox.innerHTML = '';
+
+      // Show typing indicator
+      typingIndicator.classList.remove('d-none');
+      chatBody.appendChild(typingIndicator);
+      scrollToBottom();
+
+      const phone = userPhoneInput ? userPhoneInput.value.trim() : '628123456789';
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: message,
+            phone: phone,
+            name: 'Customer Demo'
+          })
+        });
+
+        const data = await response.json();
+        
+        // Hide typing indicator after small natural delay
+        setTimeout(() => {
+          typingIndicator.classList.add('d-none');
+          appendBotMessage(data.reply, data.quick_replies || []);
+        }, 400);
+
+      } catch (err) {
+        typingIndicator.classList.add('d-none');
+        appendBotMessage("⚠️ Maaf Kak, terjadi kendala pada server chatbot. Silakan coba lagi.");
+      }
+    }
+
+    function sendQuickReply(text) {
+      // If starts with number like "1. Lihat Produk", user can just send "1" or full text
+      sendMessage(text);
+    }
+
+    // Event listeners
+    btnSend.addEventListener('click', () => sendMessage());
+    
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    btnResetChat.addEventListener('click', () => {
+      sendMessage('Batal');
+    });
+  </script>
+</body>
+</html>
